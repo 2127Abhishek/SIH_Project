@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRA Search</title>
+<style>
+:root {
+  --bg: #0f172a; --panel: #111827; --muted: #94a3b8; --text: #e5e7eb;
+  --accent: #22d3ee; --green: #22c55e; --yellow: #eab308; --red: #ef4444;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: linear-gradient(120deg,#0b1220,#0f172a 40%,#0b1220 100%);
+  color: var(--text);
+  font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #1f2937;
+  backdrop-filter: blur(6px);
+}
+header h1 { margin:0; font-size:18px; letter-spacing:.3px; }
+header .buttons { display:flex; gap:10px; }
+button, .btn-link {
+  cursor:pointer;
+  background:#0a0f1c;
+  color:var(--text);
+  border:1px solid #1f2937;
+  border-radius:10px;
+  padding:6px 10px;
+  transition:.15s ease;
+  text-decoration: none;
+}
+button:hover, .btn-link:hover { transform: translateY(-1px); }
+
+main {
+  padding: 14px;
+  overflow-y: auto;
+}
+
+.card {
+  background:#0b1220;
+  border:1px solid #1f2937;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  padding:20px;
+  max-width:800px;
+  margin:0 auto;
+}
+
+.card h2 {
+  margin:0 0 16px 0;
+  font-size:15px;
+  color:#e2e8f0;
+  border-bottom:1px solid #1f2937;
+  padding-bottom:10px;
+}
+
+.search-bar {
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.search-bar input {
+  flex:1;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #1f2937;
+  background:#0a0f1c;
+  color:var(--text);
+}
+
+.result-buttons {
+  display:none;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+
+.result-buttons button {
+  background:#1f2937;
+  border:1px solid #374151;
+  border-radius:8px;
+  padding:10px 16px;
+  font-size:13px;
+  color:var(--text);
+}
+
+.filter-bar {
+  display:none;
+  gap:10px;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.filter-bar input {
+  padding:6px;
+  border-radius:6px;
+  border:1px solid #1f2937;
+  background:#0a0f1c;
+  color:var(--text);
+  width:120px;
+}
+
+.documents {
+  display:none;
+  background:#0a0f1c;
+  border:1px solid #1f2937;
+  border-radius:12px;
+  padding:15px;
+}
+
+.documents h3 { margin-top:0; font-size:14px; color:#e2e8f0; }
+.documents ul { list-style:none; padding:0; margin:0; }
+.documents li {
+  background:#111827;
+  padding:8px;
+  border-radius:6px;
+  margin:4px 0;
+  font-size:13px;
+  display:flex;
+  gap:10px;
+}
+.documents .doc-id {
+  font-weight:bold;
+  color:var(--accent);
+  width:40px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FRA Search</h1>
+  <div class="buttons">
+    <a href="dashboard.html" class="btn-link">Dashboard</a>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Search Community Code</h2>
+    <div class="search-bar">
+      <input type="text" id="communityCode" placeholder="Enter Community Code">
+      <button onclick="showButtons()">Search</button>
+    </div>
+
+    <div class="result-buttons" id="resultButtons">
+      <button onclick="showDocuments('Claim')">Claim</button>
+      <button onclick="showDocuments('Approved')">Approved</button>
+      <button onclick="showDocuments('Rejected')">Rejected</button>
+      <button onclick="showDocuments('In Process')">In Process</button>
+      <button onclick="showDocuments('Denied')">Denied</button>
+    </div>
+
+    <div class="filter-bar" id="filterBar">
+      <button onclick="filterDocs('all')">All</button>
+      <input type="number" id="docIdInput" placeholder="Doc ID">
+      <button onclick="filterDocs('id')">Search by ID</button>
+    </div>
+
+    <div class="documents" id="documentsSection">
+      <h3 id="docTitle"></h3>
+      <ul id="docList"></ul>
+    </div>
+  </section>
+</main>
+
+<script>
+const docs = {
+  "Claim": [
+    {id: 1, name: "Claim Document 1"},
+    {id: 2, name: "Claim Document 2"},
+    {id: 3, name: "Claim Document 3"}
+  ],
+  "Approved": [
+    {id: 4, name: "Approved Doc 1"},
+    {id: 5, name: "Approved Doc 2"}
+  ],
+  "Rejected": [
+    {id: 6, name: "Rejected Doc 1"}
+  ],
+  "In Process": [
+    {id: 7, name: "In Process Doc 1"},
+    {id: 8, name: "In Process Doc 2"}
+  ],
+  "Denied": [
+    {id: 9, name: "Denied Doc 1"},
+    {id: 10, name: "Denied Doc 2"}
+  ]
+};
+
+let currentType = "";
+
+function showButtons() {
+  const code = document.getElementById('communityCode').value.trim();
+  if (code === "") {
+    alert("Please enter a community code.");
+    return;
+  }
+  document.getElementById("resultButtons").style.display = "flex";
+  document.getElementById("documentsSection").style.display = "none";
+  document.getElementById("filterBar").style.display = "none";
+}
+
+function showDocuments(type) {
+  currentType = type;
+  renderDocs(docs[type]);
+
+  document.getElementById("docTitle").innerText = type + " Documents";
+  document.getElementById("documentsSection").style.display = "block";
+  document.getElementById("filterBar").style.display = "flex";
+}
+
+function renderDocs(list) {
+  const docList = document.getElementById("docList");
+  docList.innerHTML = "";
+  list.forEach(d => {
+    let li = document.createElement("li");
+    let spanId = document.createElement("span");
+    spanId.className = "doc-id";
+    spanId.innerText = d.id;
+    let spanName = document.createElement("span");
+    spanName.innerText = d.name;
+    li.appendChild(spanId);
+    li.appendChild(spanName);
+    docList.appendChild(li);
+  });
+}
+
+function filterDocs(mode) {
+  if (!currentType) return;
+  if (mode === "all") {
+    renderDocs(docs[currentType]);
+  } else if (mode === "id") {
+    const idVal = parseInt(document.getElementById("docIdInput").value);
+    if (isNaN(idVal)) {
+      alert("Please enter a valid ID.");
+      return;
+    }
+    const filtered = docs[currentType].filter(d => d.id === idVal);
+    if (filtered.length === 0) {
+      alert("No document found with ID " + idVal);
+    }
+    renderDocs(filtered);
+  }
+}
+</script>
+
+</body>
+</html>
