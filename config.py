@@ -1,1 +1,0 @@
-api_key="Paste_gemini_api_key"
