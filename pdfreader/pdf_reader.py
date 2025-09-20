@@ -81,10 +81,11 @@ claim["Location"] = get_location(claim.get("Village"), claim.get("Taluka"), clai
 # ------------------------------
 # Save JSON file using Claim_Person name
 # ------------------------------
-claim_person = claim.get("Claim_Person", "unknown").replace(" ", "_")  # replace spaces with underscores
+claim_person = claim.get("ID_Number", "unknown").replace(" ", "_")  # replace spaces with underscores
 file_name = f"{claim_person}.json"
 
 with open(file_name, "w", encoding="utf-8") as f:
     json.dump(claim, f, ensure_ascii=False, indent=4)
 
 print(f"Final JSON saved to {file_name} in pretty format")
+
