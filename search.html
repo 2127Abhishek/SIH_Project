@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FRA Search</title>
+
+<!-- Link external CSS -->
+<link rel="stylesheet" href="search_style.css" />
+</head>
+<body>
+
+<header>
+  <h1>FRA Search</h1>
+  <div class="buttons">
+    <a href="main.html" class="btn-link">Dashboard</a>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Search Community Code</h2>
+    <div class="search-bar">
+      <input type="text" id="communityCode" placeholder="Enter Community Code">
+      <button onclick="showButtons()">Search</button>
+    </div>
+
+    <div class="result-buttons" id="resultButtons">
+      <button onclick="showDocuments('Claim')">Claim</button>
+      <button onclick="showDocuments('Approved')">Approved</button>
+      <button onclick="showDocuments('Rejected')">Rejected</button>
+      <button onclick="showDocuments('In Process')">In Process</button>
+      <button onclick="showDocuments('Denied')">Denied</button>
+    </div>
+
+    <div class="filter-bar" id="filterBar">
+      <button onclick="filterDocs('all')">All</button>
+      <input type="number" id="docIdInput" placeholder="Doc ID">
+      <button onclick="filterDocs('id')">Search by ID</button>
+    </div>
+
+    <div class="documents" id="documentsSection">
+      <h3 id="docTitle"></h3>
+      <ul id="docList"></ul>
+    </div>
+  </section>
+</main>
+
+<!-- External JS -->
+<script src="search.js"></script>
+
+</body>
+</html>
