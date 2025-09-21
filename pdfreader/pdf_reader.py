@@ -46,7 +46,7 @@ if not pdf_text.strip():
 # ------------------------------
 prompt = f"""
 Extract the following information from the text below and return ONLY a single dictionary:
-{{"ID_Number": "generate a unique numeric id","Community":"<community>","Gender":"<gender>","Village": "<village>", "Taluka": "<taluka>", "District": "<district>", "Claim_Person": "<name>","Document_status":"<Document status>"}}
+{{"ID_Number": "generate a unique numeric id","Community":"<community>","Gender":"<gender>","Village": "<village>", "Taluka": "<taluka>", "District": "<district>", "Claim_Person": "<name>","Occupation":"<occupation>","Document_status":"<Document status>"}}
 
 Text:
 {pdf_text}
@@ -88,5 +88,6 @@ with open(file_name, "w", encoding="utf-8") as f:
     json.dump(claim, f, ensure_ascii=False, indent=4)
 
 print(f"Final JSON saved to {file_name} in pretty format")
+
 
 
