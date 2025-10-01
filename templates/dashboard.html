@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FRA Dashboard</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root {
+      --bg:#0f172a; --panel:#111827; --muted:#94a3b8; --text:#e5e7eb;
+      --accent:#22d3ee; --green:#22c55e; --yellow:#eab308; --red:#ef4444;
+    }
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: linear-gradient(120deg,#0b1220,#0f172a 40%,#0b1220 100%);
+      color: var(--text);
+      font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid #1f2937;
+      backdrop-filter: blur(6px);
+    }
+    header h1 { margin:0; font-size:18px; letter-spacing:.3px; }
+    header .buttons { display:flex; gap:10px; }
+
+    button {
+      cursor:pointer;
+      background:#0a0f1c;
+      color:var(--text);
+      border:1px solid #1f2937;
+      border-radius:10px;
+      padding:6px 10px;
+      transition:.15s ease;
+    }
+    #search_button a, button a {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    button:hover { transform: translateY(-1px); }
+
+    main {
+      display:grid;
+      grid-template-columns:1.2fr 1fr;
+      gap:14px;
+      padding:14px;
+      height:calc(100vh - 56px);
+    }
+
+    .card {
+      background:#0b1220;
+      border:1px solid #1f2937;
+      border-radius:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .card h2 {
+      margin:0;
+      padding:12px 14px;
+      border-bottom:1px solid #1f2937;
+      font-size:15px;
+      color:#e2e8f0;
+    }
+
+    #map { flex:1; min-height:360px; }
+
+    .grid {
+      display:grid;
+      grid-template-columns: repeat(3,1fr);
+      gap:12px;
+      padding:12px;
+    }
+    .stat {
+      background:#0a0f1c;
+      border:1px solid #1f2937;
+      border-radius:12px;
+      padding:10px;
+      text-align:center;
+    }
+    .stat h3 {
+      margin:0 0 6px 0;
+      font-size:12px;
+      color:#94a3b8;
+      font-weight:600;
+    }
+    .stat .val { font-size:20px; font-weight:700; }
+
+    canvas {
+      background:#0b1220;
+      border:1px solid #1f2937;
+      border-radius:12px;
+      padding:8px;
+      margin-top:12px;
+    }
+
+    /* Right panel scrollable */
+    .dashboard-right {
+      overflow: auto;       /* Keeps scrolling functionality */
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For IE and Edge */
+    }
+
+    /* Scheme list grows naturally */
+    .scheme-list {
+      padding: 8px 12px;
+      margin-top: 6px;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      background: #0a0f1c;
+    }
+    .scheme-item {
+      padding: 4px 0;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    @media (max-width:1100px) {
+      main { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+
+  <!-- Chart.js & Leaflet.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>FRA Dashboard Demo</h1>
+  <div class="buttons">
+    <button>Sign In</button>
+    <button><a href="{{ url_for('upload_page') }}">Upload</a></button>
+    <button id="search_button"><a href="{{ url_for('search') }}">Search</a></button>
+  </div>
+</header>
+
+<main>
+  <!-- Left: Map -->
+  <section class="card">
+    <h2>Map Panel</h2>
+    <div id="map"></div>
+  </section>
+
+  <!-- Right: Dashboard -->
+  <section class="card dashboard-right">
+    <h2>Dashboard · Government Scheme Stats</h2>
+    <div class="grid">
+      <div class="stat"><h3>Total Claims</h3><div class="val" id="totalClaims">0</div></div>
+      <div class="stat"><h3>Total Approved</h3><div class="val" id="totalApproved">0</div></div>
+      <div class="stat"><h3>Total Rejected</h3><div class="val" id="totalRejected">0</div></div>
+      <div class="stat"><h3>Total In Process</h3><div class="val" id="totalInProcess">0</div></div>
+      <div class="stat"><h3>Total Delay</h3><div class="val" id="totalDelay">0</div></div>
+    </div>
+
+    <canvas id="barChart"></canvas>
+
+    <h2 style="margin-top:12px;">Relevant Government Schemes</h2>
+    <div class="scheme-list" id="schemeList">
+      <div class="scheme-item">Click a community on the map to see relevant schemes</div>
+    </div>
+  </section>
+</main>
+
+<script>
+  // Leaflet Map
+  const map = L.map('map').setView([21.5,79],5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:18,
+    attribution:'&copy; OpenStreetMap'
+  }).addTo(map);
+
+  let barChart;
+
+  async function loadMapAndDashboard() {
+    try {
+      const response = await fetch('/map-data');
+      const data = await response.json();
+
+      data.forEach(comm => {
+        if(!comm.latitude || !comm.longitude) return;
+
+        let color = '#22d3ee';
+        if(comm.document_status==='approved') color='#22c55e';
+        else if(comm.document_status==='rejected') color='#ef4444';
+        else if(comm.document_status==='in_process') color='#eab308';
+        else if(comm.document_status==='delayed') color='#6b7280';
+
+        const marker = L.circleMarker([comm.latitude, comm.longitude], {
+          radius: 8,
+          color: color,
+          fillColor: color,
+          fillOpacity: 0.9
+        }).addTo(map);
+
+        marker.bindPopup(`<b>${comm.village_name}, ${comm.tehsil_name}, ${comm.district_name}</b><br>
+                          Status: ${comm.document_status || 'N/A'}`);
+
+        marker.on("click", async () => {
+          if(!comm.Community_ID) return;
+
+          const res = await fetch(`/api/search?community_id=${comm.Community_ID}`);
+          const stats = await res.json();
+          updateDashboard(stats);
+
+          // Fetch schemes
+          const schemeRes = await fetch(`/api/occupations?community_id=${comm.Community_ID}`);
+          const schemeData = await schemeRes.json();
+          updateSchemes(schemeData);
+        });
+      });
+    } catch (err) { console.error(err); }
+  }
+
+  function updateDashboard(stats) {
+    let total = 0, approved=0, rejected=0, in_process=0, delayed=0;
+    if(stats){
+      for(const key in stats){
+        const count = stats[key].length;
+        total += count;
+        if(key === "approved") approved = count;
+        else if(key === "rejected") rejected = count;
+        else if(key === "in_process") in_process = count;
+        else if(key === "delayed") delayed = count;
+      }
+    }
+
+    document.getElementById('totalClaims').innerText = total;
+    document.getElementById('totalApproved').innerText = approved;
+    document.getElementById('totalRejected').innerText = rejected;
+    document.getElementById('totalInProcess').innerText = in_process;
+    document.getElementById('totalDelay').innerText = delayed;
+
+    const ctx = document.getElementById('barChart').getContext('2d');
+    if(barChart) barChart.destroy();
+    barChart = new Chart(ctx, {
+      type:'bar',
+      data: {
+        labels: ['Claim','Approved','Rejected','In Process','Delay'],
+        datasets: [{
+          label:'Number of Claims',
+          data:[total, approved, rejected, in_process, delayed],
+          backgroundColor: ['#22d3ee','#22c55e','#ef4444','#eab308','#6b7280']
+        }]
+      },
+      options:{
+        responsive:true,
+        plugins:{ legend:{ display:false } },
+        scales:{
+          x:{ ticks:{ color:'#cbd5e1' }, grid:{ color:'#1f2937' } },
+          y:{ ticks:{ color:'#cbd5e1' }, grid:{ color:'#1f2937' } }
+        }
+      }
+    });
+  }
+
+  function updateSchemes(schemeData){
+    const container = document.getElementById('schemeList');
+    container.innerHTML = '';
+    if(!schemeData || Object.keys(schemeData).length===0){
+      container.innerHTML = '<div class="scheme-item">No government schemes found</div>';
+      return;
+    }
+    for(const occ in schemeData){
+      const schemes = schemeData[occ];
+      const occHeader = document.createElement('div');
+      occHeader.className='scheme-item';
+      occHeader.style.fontWeight='600';
+      occHeader.innerText = occ;
+      container.appendChild(occHeader);
+
+      schemes.forEach(s=>{
+        const div = document.createElement('div');
+        div.className='scheme-item';
+        div.innerText = '• '+s;
+        container.appendChild(div);
+      });
+    }
+  }
+
+  async function loadOverallSummary() {
+    const response = await fetch('/api/summary');
+    const data = await response.json();
+    updateDashboard({
+      "approved": Array(data.total_approved).fill({}),
+      "rejected": Array(data.total_rejected).fill({}),
+      "in_process": Array(data.total_in_process).fill({}),
+      "delayed": Array(data.total_delayed).fill({})
+    });
+  }
+
+  loadMapAndDashboard();
+  loadOverallSummary();
+</script>
+
+</body>
+</html>

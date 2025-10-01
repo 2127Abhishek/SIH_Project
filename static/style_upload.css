@@ -1,0 +1,124 @@
+:root {
+  --bg: #0f172a;
+  --panel: #111827;
+  --muted: #94a3b8;
+  --text: #e5e7eb;
+  --accent: #0f172a;
+  --accent-hover: #0f172a;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+}
+
+header {
+  background: var(--panel);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1f2937;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+header .buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-link {
+  background: var(--accent);
+  border: 1px solid #293444;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+}
+.btn-link:hover {
+  background: var(--accent-hover);
+}
+
+main {
+  padding: 20px;
+}
+
+.card {
+  background: var(--panel);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+  max-width: 500px;
+  margin: auto;
+}
+
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+input[type="file"] {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid #1f2937;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+button {
+  background: var(--accent);
+  border: #404e61;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+button:hover {
+  background: var(--accent-hover);
+}
+
+#status {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 14px;
+}
+#uploadBtn {
+  border: 1px solid #293444;
+}
+/* Dashboard-style button using ID */
+#Dashboard_button {
+  cursor: pointer;
+  background: #0a0f1c;
+  color: var(--text);       /* keeps same text color as dashboard */
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 6px 12px;
+  transition: 0.15s ease;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;    /* removes underline for links */
+}
+
+#Dashboard_button:hover {
+  transform: translateY(-1px);
+  background: #111827;       /* slightly brighter on hover */
+}
+
+#Dashboard_button a {
+  color: inherit;           /* ensures link uses button color */
+  text-decoration: none;    /* removes underline */
+  display: block;           /* fills the button area */
+  width: 100%;
+  height: 100%;
+}

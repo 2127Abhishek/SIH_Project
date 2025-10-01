@@ -1,0 +1,61 @@
+-- ------------------------------
+-- Create database
+-- ------------------------------
+CREATE DATABASE IF NOT EXISTS FRA_Claims;
+USE FRA_Claims;
+
+-- ------------------------------
+-- Communities table
+-- ------------------------------
+CREATE TABLE IF NOT EXISTS communities (
+    Community_ID INT AUTO_INCREMENT PRIMARY KEY,
+    Community_Name VARCHAR(255) NOT NULL,
+    latitude DECIMAL(10,6) NOT NULL,
+    longitude DECIMAL(10,6) NOT NULL,
+    total_claims INT DEFAULT 0,
+    total_in_process INT DEFAULT 0,
+    total_delayed INT DEFAULT 0,
+    total_rejected INT DEFAULT 0,
+    total_approved INT DEFAULT 0,
+    UNIQUE KEY unique_community (Community_Name(100))
+);
+
+-- ------------------------------
+-- Users table
+-- ------------------------------
+CREATE TABLE IF NOT EXISTS users (
+    DOC_ID_NUMBER INT PRIMARY KEY,   -- ✅ Now acts as unique identifier
+    Community_Name VARCHAR(250),
+    Community_ID INT NOT NULL,
+    Claim_Person VARCHAR(255) NOT NULL,
+    Gender ENUM('Male','Female','Other'),
+    Occupation VARCHAR(255) NOT NULL,
+    document_status ENUM('in_process','approved','rejected','delayed'),
+    village_name VARCHAR(250) NOT NULL,
+    tehsil_name VARCHAR(250) NOT NULL,
+    district_name VARCHAR(250) NOT NULL,
+    latitude DECIMAL(10,6) NOT NULL,
+    longitude DECIMAL(10,6) NOT NULL,
+    FOREIGN KEY (Community_ID) REFERENCES communities(Community_ID),
+    UNIQUE KEY unique_person (
+        Claim_Person(50),
+        Gender,
+        Occupation(50),
+        village_name(50),
+        tehsil_name(50),
+        district_name(50)
+    )
+);
+
+-- ------------------------------
+-- Claims table
+-- ------------------------------
+CREATE TABLE IF NOT EXISTS claims (
+    claim_id INT AUTO_INCREMENT PRIMARY KEY,
+    DOC_ID_NUMBER INT NOT NULL,   -- ✅ Replaced USER_ID
+    document_status ENUM('in_process','approved','rejected','delayed'),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (DOC_ID_NUMBER) REFERENCES users(DOC_ID_NUMBER)
+);
+

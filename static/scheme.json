@@ -1,0 +1,53 @@
+{
+  "farming": [
+    "PM Kisan Samman Nidhi",
+    "PM Kisan Maandhan Yojana",
+    "PM Annadata Aay Sanrakshan Abhiyan",
+    "PM Kisan Urja Suraksha Evam Utthan Mahabhiyan"
+  ],
+  "Fisheries": [
+    "PM Matsya Sampada Yojana",
+    "Blue Revolution Scheme"
+  ],
+  "Mining": [
+    "Skill Development for Mining Sector",
+    "Mine Workers Welfare Scheme"
+  ],
+  "Handicrafts": [
+    "PM Vishwakarma Yojana",
+    "Pradhan Mantri Mudra Yojana",
+    "KVIC Schemes"
+  ],
+  "Healthcare": [
+    "Ayushman Bharat Yojana",
+    "Rashtriya Swasthya Bima Yojana",
+    "National Health Mission"
+  ],
+  "Education": [
+    "Samagra Shiksha",
+    "Sarva Shiksha Abhiyan",
+    "Rashtriya Madhyamik Shiksha Abhiyan"
+  ],
+  "Women Empowerment": [
+    "Pradhan Mantri Matritva Vandana Yojana",
+    "Rajiv Gandhi Scheme for Empowerment of Adolescent Girls",
+    "Beti Bachao Beti Padhao"
+  ],
+  "Social Security": [
+    "PM Shram Yogi Mandhan",
+    "National Social Assistance Programme",
+    "Madhu Babu Pension Yojana"
+  ],
+  "Housing": [
+    "Pradhan Mantri Awas Yojana",
+    "Svamitva Yojana"
+  ],
+  "Food Security": [
+    "Pradhan Mantri Garib Kalyan Anna Yojana",
+    "Antyodaya Anna Yojana"
+  ],
+  "Infrastructure": [
+    "Pradhan Mantri Gram Sadak Yojana",
+    "Atal Mission for Rejuvenation and Urban Transformation"
+  ]
+}
